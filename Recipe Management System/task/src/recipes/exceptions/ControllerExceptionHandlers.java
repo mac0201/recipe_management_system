@@ -17,9 +17,15 @@ import recipes.exceptions.CustomExceptions.*;
 @ControllerAdvice
 public class ControllerExceptionHandlers extends ResponseEntityExceptionHandler {
 
-    // handler for no recipes
+    // handler for no recipes with given id
     @ExceptionHandler(RecipeNotFoundException.class)
     public ResponseEntity<?> handleRecipeNotFoundException() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.build("Recipe not found"));
+    }
+
+    // handler for empty repository
+    @ExceptionHandler(RecipeRepositoryEmpty.class)
+    public ResponseEntity<?> handleRecipeRepositoryEmpty() {
         return ResponseEntity.noContent().build();
     }
 

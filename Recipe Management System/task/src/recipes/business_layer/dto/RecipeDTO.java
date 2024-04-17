@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -12,6 +13,6 @@ import javax.validation.constraints.NotEmpty;
 public class RecipeDTO {
     @NotEmpty private String name;
     @NotEmpty private String description;
-    @NotEmpty private String ingredients;
-    @NotEmpty private String directions;
+    @NotEmpty private List<String> ingredients;
+    @NotEmpty private List<String> directions;
 }
