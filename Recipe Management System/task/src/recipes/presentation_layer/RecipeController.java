@@ -18,19 +18,30 @@ public class RecipeController {
         this.recipeService = recipeService;
     }
 
-    @GetMapping("/recipe")
+    @GetMapping("/api/recipe")
     public ResponseEntity<List<RecipeDTO>> getAllRecipes() {
         return ResponseEntity.ok().body(recipeService.getRecipes());
     }
 
-    @GetMapping("/recipe/{id}")
-    public ResponseEntity<RecipeDTO> getRecipe(@PathVariable int id) {
+    @GetMapping("/api/recipe/{id}")
+    public ResponseEntity<RecipeDTO> getRecipe(@PathVariable long id) {
         return ResponseEntity.ok().body(recipeService.getRecipeById(id));
     }
 
-    @PostMapping("/recipe/new")
+    @PostMapping("/api/recipe/new")
     public ResponseEntity<AddResponseDTO> addRecipe(@Valid @RequestBody RecipeDTO recipeDTO) {
         return ResponseEntity.ok().body(recipeService.addRecipe(recipeDTO));
+    }
+
+    @DeleteMapping("/api/recipe/{id}")
+    public ResponseEntity<String> deleteRecipe(@PathVariable long id) {
+        recipeService.deleteRecipe(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/actuator/shutdown")
+    public ResponseEntity<String> shutdown() {
+        return ResponseEntity.ok().build();
     }
 
 }

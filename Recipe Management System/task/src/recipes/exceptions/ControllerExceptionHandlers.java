@@ -1,5 +1,6 @@
 package recipes.exceptions;
 
+//import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +44,11 @@ public class ControllerExceptionHandlers extends ResponseEntityExceptionHandler 
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         return ResponseEntity.badRequest().body(ErrorResponse.build("Missing or invalid request arguments"));
     }
+
+//    @ExceptionHandler(JdbcSQLIntegrityConstraintViolationException.class)
+//    protected ResponseEntity<Object> handleSQLIntegrityConstraintViolationException(JdbcSQLIntegrityConstraintViolationException ex) {
+//        return ResponseEntity.internalServerError().body(ErrorResponse.build(ex.getMessage()));
+//    }
 
     // Represents an error response object used to communicate errors to the client.
     private record ErrorResponse(String message) {

@@ -3,6 +3,14 @@ package recipes.business_layer;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static java.util.Arrays.stream;
+
 // A generic mapper class used for object-to-object mapping.
 @Component
 public class Mapper {
@@ -23,5 +31,11 @@ public class Mapper {
      */
     public <S, D> D map(S source, Class<D> destinationClass) {
         return modelMapper.map(source, destinationClass);
+    }
+
+    public <S, D> List<D> mapAll(Iterable<S> source, Class<D> destinationClass) {
+        return StreamSupport.stream(source.spliterator(), false)
+                .map(obj -> modelMapper.map(obj, destinationClass))
+                .toList();
     }
 }
