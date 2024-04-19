@@ -8,7 +8,9 @@ import recipes.exceptions.CustomExceptions;
 import recipes.persistence_layer.RecipeRepository;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Service
 public class RecipeService {
@@ -23,8 +25,19 @@ public class RecipeService {
 
     public AddResponseDTO addRecipe(RecipeDTO recipeDTO) {
         Recipe recipe = mapper.map(recipeDTO, Recipe.class);
+        recipe.setDate(LocalDateTime.now());
         recipe = this.recipeRepository.save(recipe);
         return new AddResponseDTO(recipe.getId());
+    }
+
+    public AddResponseDTO addMultipleRecipes(List<RecipeDTO> recipeDTOList) {
+        recipeDTOList.stream()
+                .map(r -> mapper.map(r, Recipe.class))
+                .forEach(r -> {
+                    r.setDate(LocalDateTime.now());
+                    this.recipeRepository.save(r);
+                });
+        return new AddResponseDTO(recipeDTOList.size());
     }
 
     public List<RecipeDTO> getRecipes() {
@@ -41,14 +54,43 @@ public class RecipeService {
     }
 
     @Transactional
-    public RecipeDTO deleteRecipe(long id) {
+    public void deleteRecipe(long id) {
         // Find Optional<Recipe> by id and throw exception if it does not exist, otherwise delete recipe from database,
         // and return a mapped RecipeDTO object
-        Recipe recipe = recipeRepository
-                .findById(id)
+        Recipe recipe = recipeRepository.findById(id)
                 .orElseThrow(CustomExceptions.RecipeNotFoundException::new);
         recipeRepository.delete(recipe);
-        return mapper.map(recipe, RecipeDTO.class);
+    }
+
+    // Update recipe with given id
+    public AddResponseDTO updateRecipe(long id, RecipeDTO recipeDTO) {
+        // find existing
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(CustomExceptions.RecipeNotFoundException::new);
+        // update fields
+        recipe.setName(recipeDTO.getName());
+        recipe.setDescription(recipeDTO.getDescription());
+        recipe.setCategory(recipeDTO.getCategory());
+        recipe.setDate(LocalDateTime.now());
+        recipe.setIngredients(recipeDTO.getIngredients());
+        recipe.setDirections(recipeDTO.getDirections());
+
+        recipeRepository.save(recipe);
+        return new AddResponseDTO(id);
+    }
+
+    @Transactional
+    public List<RecipeDTO> getRecipesByName(String name) {
+        return recipeRepository.findAllByNameContainsIgnoreCaseOrderByDateDesc(name)
+                .map(recipe -> mapper.map(recipe, RecipeDTO.class))
+                .toList();
+    }
+
+    @Transactional
+    public List<RecipeDTO> getRecipesByCategory(String category) {
+        return recipeRepository.findAllByCategoryIgnoreCaseOrderByDateDesc(category)
+                .map(recipe -> mapper.map(recipe, RecipeDTO.class))
+                .toList();
     }
 
 }

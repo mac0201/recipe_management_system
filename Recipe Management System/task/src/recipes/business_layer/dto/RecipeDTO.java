@@ -4,10 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -15,7 +13,9 @@ import java.util.List;
 @AllArgsConstructor
 public class RecipeDTO {
     @NotBlank private String name;
+    @NotBlank private String category;
     @NotBlank private String description;
+    private LocalDateTime date;
     @NotEmpty @Size(min = 1)
     private List<String> ingredients;
     @NotEmpty @Size(min = 1)

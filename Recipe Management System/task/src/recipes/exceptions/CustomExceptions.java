@@ -8,4 +8,8 @@ public class CustomExceptions {
     public static class RecipeRepositoryEmpty extends RuntimeException {
         public RecipeRepositoryEmpty() { super("Recipe repository is empty"); }
     }
+
+    public static class InvalidSearchParameterException extends RuntimeException {
+        public InvalidSearchParameterException() { super("Invalid search parameter(s)"); }
+    }
 }
