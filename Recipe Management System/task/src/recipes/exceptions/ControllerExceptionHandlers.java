@@ -50,6 +50,12 @@ public class ControllerExceptionHandlers extends ResponseEntityExceptionHandler 
 //        return ResponseEntity.internalServerError().body(ErrorResponse.build(ex.getMessage()));
 //    }
 
+    // Most likely thrown when model mapping of class fails
+    @ExceptionHandler(ClassCastException.class)
+    protected ResponseEntity<Object> handleClassCastException(ClassCastException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        return ResponseEntity.internalServerError().body(ErrorResponse.build("Server encountered an issue while fulfilling the request"));
+    }
+
     // Represents an error response object used to communicate errors to the client.
     private record ErrorResponse(String message) {
         static ErrorResponse build(String message) {

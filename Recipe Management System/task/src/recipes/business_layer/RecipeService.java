@@ -9,7 +9,6 @@ import recipes.persistence_layer.RecipeRepository;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class RecipeService {
@@ -29,20 +28,25 @@ public class RecipeService {
     }
 
     public List<RecipeDTO> getRecipes() {
+        // Finds all Recipe objects in the database and returns them as a List of RecipeDTO objects
         return mapper.mapAll(recipeRepository.findAll(), RecipeDTO.class);
     }
 
     public RecipeDTO getRecipeById(long id) {
-        Optional<Recipe> recipe = recipeRepository.findById(id);
-        // throw exception if recipe does not exist
-        return mapper.map(recipe.orElseThrow(CustomExceptions.RecipeNotFoundException::new), RecipeDTO.class);
+        // Find Optional<Recipe> by id and throw exception if it does not exist, otherwise map the result to RecipeDTO
+        return mapper.map(
+                recipeRepository.findById(id)
+                        .orElseThrow(CustomExceptions.RecipeNotFoundException::new),
+                RecipeDTO.class);
     }
 
     @Transactional
     public RecipeDTO deleteRecipe(long id) {
-        Optional<Recipe> recipeOptional = recipeRepository.findById(id);
-        // throw exception if recipe does not exist
-        Recipe recipe =  recipeOptional.orElseThrow(CustomExceptions.RecipeNotFoundException::new);
+        // Find Optional<Recipe> by id and throw exception if it does not exist, otherwise delete recipe from database,
+        // and return a mapped RecipeDTO object
+        Recipe recipe = recipeRepository
+                .findById(id)
+                .orElseThrow(CustomExceptions.RecipeNotFoundException::new);
         recipeRepository.delete(recipe);
         return mapper.map(recipe, RecipeDTO.class);
     }

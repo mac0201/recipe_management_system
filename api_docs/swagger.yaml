@@ -1,0 +1,105 @@
+openapi: 3.0.0
+info:
+  title: Recipe Management System
+  description: API for managing recipes
+  version: 1.0.0
+
+servers:
+  - url: /api
+
+paths:
+  /recipe:
+    get:
+      summary: List all recipes
+      description: Retrieves a list of all stored recipes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecipeDTO'
+#        response for empty list??
+
+  /recipe/{id}:
+    get:
+      summary: Get recipe by ID
+      description: Retrieves a specific recipe by its unique identifier
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the recipe
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecipeDTO'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete recipe by ID
+      description: Deletes a specific recipe by its unique identifier
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the recipe
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /recipe/new:
+    post:
+
+
+
+
+
+components:
+  schemas:
+    RecipeDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the recipe
+        description:
+          type: string
+          description: Description of the recipe
+        ingredients:
+          type: array
+          description: A list of ingredients in the recipe
+        directions:
+          type: array
+          description: A list of directions in the recipe
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error message

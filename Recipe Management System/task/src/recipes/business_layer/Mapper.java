@@ -1,17 +1,12 @@
 package recipes.business_layer;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.util.Streamable;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
-import static java.util.Arrays.stream;
-
-// A generic mapper class used for object-to-object mapping.
+/** A generic mapper class used for object-to-object mapping. */
 @Component
 public class Mapper {
 
@@ -33,9 +28,17 @@ public class Mapper {
         return modelMapper.map(source, destinationClass);
     }
 
-    public <S, D> List<D> mapAll(Iterable<S> source, Class<D> destinationClass) {
-        return StreamSupport.stream(source.spliterator(), false)
-                .map(obj -> modelMapper.map(obj, destinationClass))
-                .toList();
+    /**
+     * Converts a stream of source objects into a list of destination objects using a mapping mechanism.
+     * The mapping is performed by the internal {@link ModelMapper} instance, which transforms objects from source
+     *      type (S) to the specified destination type (D).
+     * @param source The Streamable source collection containing objects to be mapped
+     * @param destinationClass The class representing the desired type for the mapped objects in the list
+     * @param <S> The type of elements in the source stream
+     * @param <D> The type of elements in the resulting list
+     * @return A new List containing the mapped objects of type D.
+     */
+    public <S, D> List<D> mapAll(Streamable<S> source, Class<D> destinationClass) {
+        return source.map(obj -> modelMapper.map(obj, destinationClass)).stream().toList();
     }
 }
