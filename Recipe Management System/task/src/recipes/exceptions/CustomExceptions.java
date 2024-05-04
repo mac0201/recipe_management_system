@@ -16,4 +16,8 @@ public class CustomExceptions {
     public static class UserAlreadyExistsException extends RuntimeException {
         public UserAlreadyExistsException() { super("Email already exists"); }
     }
+
+    public static class RegistrationParametersInvalidException extends RuntimeException {
+        public RegistrationParametersInvalidException() { super("Invalid registration parameter(s)"); }
+    }
 }

@@ -15,6 +15,8 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import recipes.exceptions.CustomExceptions.*;
 
+import javax.validation.ConstraintViolationException;
+
 
 @ControllerAdvice
 public class ControllerExceptionHandlers extends ResponseEntityExceptionHandler {
@@ -47,6 +49,15 @@ public class ControllerExceptionHandlers extends ResponseEntityExceptionHandler 
         return ResponseEntity.badRequest().body(ErrorResponse.build(ex.getMessage()));
     }
 
+    @ExceptionHandler({ConstraintViolationException.class, RegistrationParametersInvalidException.class})
+    protected ResponseEntity<Object> handleConstraintViolationException(RuntimeException ex) {
+        return ResponseEntity.badRequest().body(ErrorResponse.build(ex.getMessage()));
+    }
+
+
+
+
+
     // Spring standard exceptions
     // handler for invalid request bodies
     @Override
@@ -61,6 +72,7 @@ public class ControllerExceptionHandlers extends ResponseEntityExceptionHandler 
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         return ResponseEntity.badRequest().body(ErrorResponse.build("Missing or invalid request arguments"));
     }
+
 
 
 

@@ -1,6 +1,7 @@
 package recipes.business_layer;
 
 import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.data.util.Streamable;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +13,10 @@ public class Mapper {
 
     private final ModelMapper modelMapper;
 
-    public Mapper() { this.modelMapper = new ModelMapper(); }
+    public Mapper() {
+        this.modelMapper = new ModelMapper();
+//        this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+    }
 
     /**
      * Maps a source object to a destination class.

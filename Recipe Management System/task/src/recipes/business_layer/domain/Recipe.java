@@ -1,5 +1,6 @@
 package recipes.business_layer.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.data.annotation.Reference;
 
@@ -9,15 +10,20 @@ import java.util.List;
 
 @Entity
 @Table(name = "recipes")
-@Data
+//@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class Recipe {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
-    private long id;
+    @Column(name = "recipe_id", nullable = false)
+    private long recipeId;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     private String name;
@@ -28,4 +34,5 @@ public class Recipe {
     private List<String> ingredients;
     @ElementCollection
     private List<String> directions;
+
 }

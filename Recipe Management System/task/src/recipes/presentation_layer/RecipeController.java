@@ -1,7 +1,11 @@
 package recipes.presentation_layer;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import recipes.business_layer.AuthService;
+import recipes.business_layer.domain.User;
 import recipes.business_layer.dto.AddResponseDTO;
 import recipes.business_layer.dto.RecipeDTO;
 import recipes.business_layer.RecipeService;
@@ -21,7 +25,8 @@ public class RecipeController {
     }
 
     @PostMapping("/new")
-    public ResponseEntity<AddResponseDTO> addRecipe(@Valid @RequestBody RecipeDTO recipeDTO) {
+    public ResponseEntity<AddResponseDTO> addRecipe(@Valid @RequestBody RecipeDTO recipeDTO, @AuthenticationPrincipal AuthService.UserAdapter auth) {
+        System.out.println("auth: " + auth.getUsername());
         return ResponseEntity.ok().body(recipeService.addRecipe(recipeDTO));
     }
 
@@ -64,6 +69,11 @@ public class RecipeController {
         // if name passed -> search by name
         if (name != null) return ResponseEntity.ok(recipeService.getRecipesByName(name));
         else return ResponseEntity.ok(recipeService.getRecipesByCategory(category));
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<RecipeDTO>> getCurrentUserRecipes() {
+        return ResponseEntity.ok(recipeService.getRecipesFromCurrentUser());
     }
 
 }

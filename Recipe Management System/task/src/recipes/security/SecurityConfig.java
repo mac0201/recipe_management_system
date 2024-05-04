@@ -37,12 +37,14 @@ public class SecurityConfig {
                 /// HERE
                 // like in Spring Security 3.2.5
                 // .requestMatchers("/login").anonymous()
+                .antMatchers("/h2-console/**").permitAll()
                 .anyRequest().authenticated()
         );
 
         http.formLogin(Customizer.withDefaults());
         http.httpBasic(Customizer.withDefaults());
         http.csrf().disable();
+        http.headers().frameOptions().disable();
 
 
         return http.build();
