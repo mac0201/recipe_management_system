@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class RecipeDTO {
     private long recipeId;
-    private long userId;
+    private String user;
     @NotBlank private String name;
     @NotBlank private String category;
     @NotBlank private String description;

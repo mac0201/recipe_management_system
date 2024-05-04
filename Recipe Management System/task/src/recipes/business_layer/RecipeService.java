@@ -1,6 +1,7 @@
 package recipes.business_layer;
 
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import recipes.business_layer.domain.Recipe;
 import recipes.business_layer.domain.User;
@@ -40,9 +41,10 @@ public class RecipeService {
 
         Recipe recipe = mapper.map(recipeDTO, Recipe.class);
         recipe.setDate(LocalDateTime.now());
-        recipe.setUser(user);
+//        recipe.setUser(user);
 //        user.getRecipes().add(recipe);
 
+        recipe.setUserEmail(user.getEmail());
         recipe = this.recipeRepository.save(recipe);
 
 
@@ -115,12 +117,10 @@ public class RecipeService {
     }
 
     @Transactional
-    public List<RecipeDTO> getRecipesFromCurrentUser() {
-        AuthService.UserAdapter user = (AuthService.UserAdapter) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return recipeRepository.findAllByUser(user.getUser())
+    public List<RecipeDTO> getRecipesFromCurrentUser(String email) {
+        return recipeRepository.findAllByUserEmail(email)
                 .map(recipe -> mapper.map(recipe, RecipeDTO.class))
                 .toList();
-
     }
 
 }

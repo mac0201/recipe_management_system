@@ -11,6 +11,6 @@ public interface RecipeRepository extends CrudRepository<Recipe, Long> {
     Streamable<Recipe> findAll();
     Stream<Recipe> findAllByNameContainsIgnoreCaseOrderByDateDesc(String name);
     Stream<Recipe> findAllByCategoryIgnoreCaseOrderByDateDesc(String category);
-    Stream<Recipe> findAllByUser(User user);
+    Stream<Recipe> findAllByUserEmail(String userEmail);
     boolean existsById(Long id);
 }

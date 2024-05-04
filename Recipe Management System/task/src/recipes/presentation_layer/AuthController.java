@@ -29,7 +29,6 @@ public class AuthController {
         // check for body parameter errors before passing the request dto to auth service
         if (bindingResult.hasErrors()) throw new CustomExceptions.RegistrationParametersInvalidException();
 
-        System.out.println("Registering...");
         User user = authService.registerUser(registrationDTO);
         return ResponseEntity.ok(user);
     }

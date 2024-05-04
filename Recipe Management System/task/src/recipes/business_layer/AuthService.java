@@ -13,6 +13,7 @@ import recipes.business_layer.dto.RegistrationRequestDTO;
 import recipes.exceptions.CustomExceptions;
 import recipes.persistence_layer.UserRepository;
 
+import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class AuthService implements UserDetailsService {
         return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
+    @Transactional
     public User registerUser(RegistrationRequestDTO registrationDTO) {
         // check if user already exists
         if (userRepository.findByEmail(registrationDTO.email()).isPresent()) throw new CustomExceptions.UserAlreadyExistsException();
@@ -39,15 +41,15 @@ public class AuthService implements UserDetailsService {
         User user = new User();
         user.setEmail(registrationDTO.email());
         user.setPassword(passwordEncoder.encode(registrationDTO.password()));
-//        user.setAuthorities(List.of("ROLE_USER"));
-
+        user.setAuthorities(List.of("ROLE_USER"));
         userRepository.save(user);
+
         return user;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(s)
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found")); // ! ADD HANDLER
         return new UserAdapter(user);
     }
@@ -96,14 +98,6 @@ public class AuthService implements UserDetailsService {
             return true;
         }
 
-        @Override
-        public String toString() {
-            return user.toString();
-        }
-
-        public User getUser() {
-            return user;
-        }
     }
 
 }

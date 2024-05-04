@@ -72,8 +72,9 @@ public class RecipeController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<RecipeDTO>> getCurrentUserRecipes() {
-        return ResponseEntity.ok(recipeService.getRecipesFromCurrentUser());
+    public ResponseEntity<List<RecipeDTO>> getCurrentUserRecipes(@AuthenticationPrincipal UserDetails details) {
+        // username == email
+        return ResponseEntity.ok(recipeService.getRecipesFromCurrentUser(details.getUsername()));
     }
 
 }

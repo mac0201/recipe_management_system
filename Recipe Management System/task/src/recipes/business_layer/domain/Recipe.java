@@ -17,14 +17,18 @@ import java.util.List;
 @Setter
 public class Recipe {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @SequenceGenerator(name = "recipe_seq", initialValue = 1, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "recipe_seq")
     @Column(name = "recipe_id", nullable = false)
     private long recipeId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    @JsonIgnore
-    private User user;
+//    @ManyToOne
+//    @JoinColumn(name = "user_id")
+//    @JsonIgnore
+//    private User user;
+
+    @Column(name = "user_email")
+    private String userEmail;
 
     private String name;
     private String category;
