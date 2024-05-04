@@ -42,8 +42,8 @@ public class ControllerExceptionHandlers extends ResponseEntityExceptionHandler 
         return ResponseEntity.internalServerError().body(ErrorResponse.build("Server encountered an issue while fulfilling the request"));
     }
 
-    @ExceptionHandler(InvalidSearchParameterException.class)
-    protected ResponseEntity<Object> handleInvalidSearchParameterException(InvalidSearchParameterException ex) {
+    @ExceptionHandler({InvalidSearchParameterException.class, UserAlreadyExistsException.class})
+    protected ResponseEntity<Object> handleInvalidSearchParameterException(RuntimeException ex) {
         return ResponseEntity.badRequest().body(ErrorResponse.build(ex.getMessage()));
     }
 

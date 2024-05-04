@@ -12,4 +12,8 @@ public class CustomExceptions {
     public static class InvalidSearchParameterException extends RuntimeException {
         public InvalidSearchParameterException() { super("Invalid search parameter(s)"); }
     }
+
+    public static class UserAlreadyExistsException extends RuntimeException {
+        public UserAlreadyExistsException() { super("Email already exists"); }
+    }
 }

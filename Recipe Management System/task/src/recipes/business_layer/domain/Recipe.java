@@ -1,6 +1,7 @@
 package recipes.business_layer.domain;
 
 import lombok.*;
+import org.springframework.data.annotation.Reference;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -14,6 +15,11 @@ public class Recipe {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private long id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     private String name;
     private String category;
     private String description;
