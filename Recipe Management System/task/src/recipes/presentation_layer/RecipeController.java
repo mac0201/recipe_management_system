@@ -4,14 +4,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import recipes.business_layer.AuthService;
-import recipes.business_layer.domain.User;
 import recipes.business_layer.dto.AddResponseDTO;
 import recipes.business_layer.dto.RecipeDTO;
 import recipes.business_layer.RecipeService;
 import recipes.exceptions.CustomExceptions;
 
 import javax.validation.Valid;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestController
@@ -24,36 +23,33 @@ public class RecipeController {
         this.recipeService = recipeService;
     }
 
+    // Add new recipe
     @PostMapping("/new")
-    public ResponseEntity<AddResponseDTO> addRecipe(@Valid @RequestBody RecipeDTO recipeDTO, @AuthenticationPrincipal AuthService.UserAdapter auth) {
-        System.out.println("auth: " + auth.getUsername());
+    public ResponseEntity<AddResponseDTO> addRecipe(@Valid @RequestBody RecipeDTO recipeDTO) {
         return ResponseEntity.ok().body(recipeService.addRecipe(recipeDTO));
     }
 
-    @PostMapping("/new/multiple")
-    public ResponseEntity<AddResponseDTO> addRecipe(@Valid @RequestBody List<RecipeDTO> recipeDTO) {
-        return ResponseEntity.ok().body(recipeService.addMultipleRecipes(recipeDTO));
-    }
-
+    // Get list of all recipes
     @GetMapping()
     public ResponseEntity<List<RecipeDTO>> getAllRecipes() {
-        return ResponseEntity.ok().body(recipeService.getRecipes());
+        return ResponseEntity.ok().body(recipeService.findAllRecipes());
     }
 
+    // Get recipe with specified id
     @GetMapping("/{id}")
     public ResponseEntity<RecipeDTO> getRecipe(@PathVariable long id) {
-        return ResponseEntity.ok().body(recipeService.getRecipeById(id));
+        return ResponseEntity.ok().body(recipeService.findRecipeById(id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRecipe(@PathVariable long id) {
+    public ResponseEntity<Void> deleteRecipe(@PathVariable long id) throws AccessDeniedException {
         recipeService.deleteRecipe(id);
         return ResponseEntity.noContent().build();
     }
 
     // Stage 4
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateRecipe(@PathVariable long id, @Valid @RequestBody RecipeDTO recipeDTO) {
+    public ResponseEntity<Object> updateRecipe(@PathVariable long id, @Valid @RequestBody RecipeDTO recipeDTO) throws AccessDeniedException {
         recipeService.updateRecipe(id, recipeDTO);
         return ResponseEntity.noContent().build();
     }
@@ -67,14 +63,13 @@ public class RecipeController {
             throw new CustomExceptions.InvalidSearchParameterException();
         }
         // if name passed -> search by name
-        if (name != null) return ResponseEntity.ok(recipeService.getRecipesByName(name));
-        else return ResponseEntity.ok(recipeService.getRecipesByCategory(category));
+        if (name != null) return ResponseEntity.ok(recipeService.findRecipesByName(name));
+        else return ResponseEntity.ok(recipeService.findRecipesByCategory(category));
     }
 
-    @GetMapping("/mine")
+    @GetMapping("/user")
     public ResponseEntity<List<RecipeDTO>> getCurrentUserRecipes(@AuthenticationPrincipal UserDetails details) {
         // username == email
-        return ResponseEntity.ok(recipeService.getRecipesFromCurrentUser(details.getUsername()));
+        return ResponseEntity.ok(recipeService.findRecipesFromCurrentUser(details.getUsername()));
     }
-
 }

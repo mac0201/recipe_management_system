@@ -28,7 +28,7 @@ public class AuthService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User getUser(String email) {
+    public User findUser(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
@@ -36,25 +36,22 @@ public class AuthService implements UserDetailsService {
     public User registerUser(RegistrationRequestDTO registrationDTO) {
         // check if user already exists
         if (userRepository.findByEmail(registrationDTO.email()).isPresent()) throw new CustomExceptions.UserAlreadyExistsException();
-
         // create new user
         User user = new User();
         user.setEmail(registrationDTO.email());
         user.setPassword(passwordEncoder.encode(registrationDTO.password()));
         user.setAuthorities(List.of("ROLE_USER"));
         userRepository.save(user);
-
         return user;
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found")); // ! ADD HANDLER
+        User user = findUser(email);
         return new UserAdapter(user);
     }
 
-    public static class UserAdapter implements UserDetails {
+    static class UserAdapter implements UserDetails {
 
         private final User user;
 
@@ -64,8 +61,8 @@ public class AuthService implements UserDetailsService {
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            return List.of();
-//            return user.getAuthorities().stream().map(SimpleGrantedAuthority::new).toList();
+//            return List.of();
+            return user.getAuthorities().stream().map(SimpleGrantedAuthority::new).toList();
         }
 
         @Override
@@ -97,9 +94,7 @@ public class AuthService implements UserDetailsService {
         public boolean isEnabled() {
             return true;
         }
-
     }
-
 }
 
 

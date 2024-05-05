@@ -1,16 +1,16 @@
 package recipes.business_layer;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import recipes.business_layer.domain.Recipe;
-import recipes.business_layer.domain.User;
 import recipes.business_layer.dto.AddResponseDTO;
 import recipes.business_layer.dto.RecipeDTO;
 import recipes.exceptions.CustomExceptions;
 import recipes.persistence_layer.RecipeRepository;
 
 import javax.transaction.Transactional;
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,57 +19,33 @@ import java.util.List;
 public class RecipeService {
 
     private final RecipeRepository recipeRepository;
-    private final AuthService authService;
     private final Mapper mapper;
 
-    public RecipeService(RecipeRepository recipeRepository, Mapper modelMapper, AuthService authService) {
+    public RecipeService(RecipeRepository recipeRepository, Mapper modelMapper) {
         this.recipeRepository = recipeRepository;
         this.mapper = modelMapper;
-        this.authService = authService;
     }
 
     @Transactional
     public AddResponseDTO addRecipe(RecipeDTO recipeDTO) {
-
-        AuthService.UserAdapter adapter = (AuthService.UserAdapter) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        User user = authService.getUser(adapter.getUsername());
-
-
-
-//        User user = adapter.getUser();
-
+        // Get current authenticated user
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        // Map the DTO into Recipe object and set required fields
         Recipe recipe = mapper.map(recipeDTO, Recipe.class);
         recipe.setDate(LocalDateTime.now());
-//        recipe.setUser(user);
-//        user.getRecipes().add(recipe);
-
-        recipe.setUserEmail(user.getEmail());
+        recipe.setUserEmail(auth.getName());
+        // Save recipe
         recipe = this.recipeRepository.save(recipe);
-
-
-        System.out.println(recipe);
-
         return new AddResponseDTO(recipe.getRecipeId());
     }
 
-    public AddResponseDTO addMultipleRecipes(List<RecipeDTO> recipeDTOList) {
-        recipeDTOList.stream()
-                .map(r -> mapper.map(r, Recipe.class))
-                .forEach(r -> {
-                    r.setDate(LocalDateTime.now());
-                    this.recipeRepository.save(r);
-                });
-        return new AddResponseDTO(recipeDTOList.size());
-    }
-
-    public List<RecipeDTO> getRecipes() {
-        // Finds all Recipe objects in the database and returns them as a List of RecipeDTO objects
+    public List<RecipeDTO> findAllRecipes() {
+        // Retrieve all recipes, map each into a RecipeDTO object and return in a list
         return mapper.mapAll(recipeRepository.findAll(), RecipeDTO.class);
     }
 
-    public RecipeDTO getRecipeById(long id) {
-        // Find Optional<Recipe> by id and throw exception if it does not exist, otherwise map the result to RecipeDTO
+    public RecipeDTO findRecipeById(long id) {
+        // Find recipe with given id. If found map to RecipeDTO object, else throw exception.
         return mapper.map(
                 recipeRepository.findById(id)
                         .orElseThrow(CustomExceptions.RecipeNotFoundException::new),
@@ -77,19 +53,16 @@ public class RecipeService {
     }
 
     @Transactional
-    public void deleteRecipe(long id) {
-        // Find Optional<Recipe> by id and throw exception if it does not exist, otherwise delete recipe from database,
-        // and return a mapped RecipeDTO object
-        Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(CustomExceptions.RecipeNotFoundException::new);
+    public void deleteRecipe(long id) throws AccessDeniedException {
+        // Retrieve and delete recipe with given id if current user is the author
+        Recipe recipe = verifyIdentityAndGetRecipe(id);
         recipeRepository.delete(recipe);
     }
 
     // Update recipe with given id
-    public AddResponseDTO updateRecipe(long id, RecipeDTO recipeDTO) {
-        // find existing
-        Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(CustomExceptions.RecipeNotFoundException::new);
+    public void updateRecipe(long id, RecipeDTO recipeDTO) throws AccessDeniedException {
+        // Retrieve and update recipe with given id if current user is the author
+        Recipe recipe = verifyIdentityAndGetRecipe(id);
         // update fields
         recipe.setName(recipeDTO.getName());
         recipe.setDescription(recipeDTO.getDescription());
@@ -97,30 +70,40 @@ public class RecipeService {
         recipe.setDate(LocalDateTime.now());
         recipe.setIngredients(recipeDTO.getIngredients());
         recipe.setDirections(recipeDTO.getDirections());
-
         recipeRepository.save(recipe);
-        return new AddResponseDTO(id);
     }
 
     @Transactional
-    public List<RecipeDTO> getRecipesByName(String name) {
+    public List<RecipeDTO> findRecipesByName(String name) {
         return recipeRepository.findAllByNameContainsIgnoreCaseOrderByDateDesc(name)
                 .map(recipe -> mapper.map(recipe, RecipeDTO.class))
                 .toList();
     }
 
     @Transactional
-    public List<RecipeDTO> getRecipesByCategory(String category) {
+    public List<RecipeDTO> findRecipesByCategory(String category) {
         return recipeRepository.findAllByCategoryIgnoreCaseOrderByDateDesc(category)
                 .map(recipe -> mapper.map(recipe, RecipeDTO.class))
                 .toList();
     }
 
     @Transactional
-    public List<RecipeDTO> getRecipesFromCurrentUser(String email) {
+    public List<RecipeDTO> findRecipesFromCurrentUser(String email) {
         return recipeRepository.findAllByUserEmail(email)
                 .map(recipe -> mapper.map(recipe, RecipeDTO.class))
                 .toList();
     }
 
+    // Retrieves recipe with the given id and verifies current user is the author
+    private Recipe verifyIdentityAndGetRecipe(long id) throws AccessDeniedException {
+        // Retrieve Optional containing recipe with given id, else throw exception
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(CustomExceptions.RecipeNotFoundException::new);
+        // Get auth context
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        // Verify current user is author
+        if (!recipe.getUserEmail().equals(auth.getName()))
+            throw new AccessDeniedException("Only the author can modify this recipe.");
+        return recipe;
+    }
 }
